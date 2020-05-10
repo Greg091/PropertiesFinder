@@ -2,6 +2,7 @@
 {
     public enum PolishCity
     {
+        BRAK,
         ALEKSANDROW_KUJAWSKI,
         ALEKSANDROW_LODZKI,
         ALWERNIA,
