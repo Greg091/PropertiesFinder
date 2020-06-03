@@ -33,5 +33,6 @@ namespace Models
         /// Czy oferta jest aktualna
         /// </summary>
         public bool IsStillValid { get; set; }
+        public int ID { get; set; }
     }
 }

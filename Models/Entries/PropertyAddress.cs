@@ -22,5 +22,6 @@
         /// Numer budynku/mieszkania
         /// </summary>
         public string DetailedAddress { get; set; }
+        public int ID { get; set; }
     }
 }

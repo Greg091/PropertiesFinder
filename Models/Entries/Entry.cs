@@ -16,5 +16,6 @@
         /// Nieprzetworzony tekst z ogłoszenia
         /// </summary>
         public string RawDescription { get; set; }
+        public int ID { get; set; }
     }
 }

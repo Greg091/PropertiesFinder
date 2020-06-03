@@ -58,6 +58,55 @@ namespace Application.Sample
             public string url { get; set; }
             public propertyInfo() { }
         }
+
+        /* GetEntriesFromPage -  pobiera entry z wybranej strony */
+        public static List<Entry> GetEntriesFromPage(int page)
+        {
+            var offers = getPageWithOffer(page);
+            if (offers == null)
+                return null;
+
+            var entries = new List<Entry>();
+
+            foreach (var offer in offers)
+            {
+                try
+                {
+                    entries.Add(newEntry(parseOffer(offer)));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
+            }
+
+            return entries;
+        }
+        /* GetEntries -  pobiera entry ze wszystkich stron */
+        public static List<Entry> GetEntries()
+        {
+            var offers = getAllPagesWithOffer();
+            if (offers == null)
+                return null;
+
+            var entries = new List<Entry>();
+
+            foreach (var offer in offers)
+            {
+                try
+                {
+                    entries.Add(newEntry(parseOffer(offer)));
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
+            }
+
+            return entries;
+        }
         public Dump GenerateDump()
         {
             List<string> offers = getAllPagesWithOffer();
@@ -78,7 +127,7 @@ namespace Application.Sample
         }
 
         /*  getHtmlDocument - pobranie zawartości strony internetowej*/
-        private HtmlDocument getHtmlDocument(String url)
+        private static HtmlDocument getHtmlDocument(String url)
         {
             var htmlWeb = new HtmlWeb();
             var lastStatusCode = HttpStatusCode.OK;
@@ -103,7 +152,7 @@ namespace Application.Sample
         public static string URL_FLAT_SALE = "https://gwenieruchomosci.pl/oferty?oferta=sprzedaz&nieruchomosc=mieszkanie&strona=";
 
         /* getAllPagesWithOffer - pobranie wszystkich adresów stron zawierających ofertę sprzedaży mieszkania */
-        public List<string> getAllPagesWithOffer()
+        public static List<string> getAllPagesWithOffer()
         {
             List<string> pagesWithOffer = new List<string>();
             int pageIndex = 1;
@@ -123,11 +172,27 @@ namespace Application.Sample
             return pagesWithOffer;
         }
 
+        public static List<string> getPageWithOffer(int pageNumber)
+        {
+            List<string> pagesWithOffer = new List<string>();
+            string url = URL_FLAT_SALE + pageNumber.ToString();
+            var page = getHtmlDocument(url);
+            if (page.DocumentNode.SelectNodes("//a[@class='property-img']") != null)
+            {
+                var offers = page.DocumentNode.SelectNodes("//a[@class='property-img']");
+                foreach (var offer in offers)
+                {
+                    pagesWithOffer.Add(offer.GetAttributeValue("href", string.Empty));
+                }
+            }
+            return pagesWithOffer;
+        }
+
         /*
          * parseOffer - parsuje niebędne dane ze strony z ofertą sprzedaży
          * mieszkania, i zwraca je w postaci obiektu kalsy propertyInfo
          */
-        public propertyInfo parseOffer(string url_offer)
+        public static propertyInfo parseOffer(string url_offer)
         {
             propertyInfo p_info = new propertyInfo();
             p_info.url = url_offer;
@@ -272,7 +337,7 @@ namespace Application.Sample
         }
 
         /* newEntry - stworzenie noewego Entry */
-        private Entry newEntry(propertyInfo pi)
+        private static Entry newEntry(propertyInfo pi)
         {
             var entry = new Entry
             {
@@ -286,7 +351,7 @@ namespace Application.Sample
                         Email = pi.email,
                         Telephone = pi.phone
                     },
-                    IsStillValid = true
+                    IsStillValid = true,
                 },
                 RawDescription = translatePolishSigns(pi.description),
                 PropertyPrice = new PropertyPrice
@@ -324,7 +389,7 @@ namespace Application.Sample
          * parseCity - parsuje lokazlizację i zwraca nazwę miasta,
          * w razie niepowodzenia ustawia nazwę na BRAK
          */
-        public PolishCity parseCity(string loc)
+        public static PolishCity parseCity(string loc)
         {
             PolishCity result;
             string city = loc.Split(' ')[0].Trim().ToUpper();
@@ -335,7 +400,7 @@ namespace Application.Sample
             return PolishCity.BRAK;
         }
         /* parseDistrict - parsuje lokalizację i zwraca nazwę dzielnicy */
-        public string parseDistrict(string loc)
+        public static string parseDistrict(string loc)
         {
             string district_name = "";
             foreach (string name in loc.Split(' ').Skip(1))
@@ -346,7 +411,7 @@ namespace Application.Sample
         }
 
         /* translatePolishSigns - usuwa znaki polskie i zamienia na zwykłe */
-        public string translatePolishSigns(String toTranslate)
+        public static string translatePolishSigns(String toTranslate)
         {
             var after = toTranslate.Replace('Ą', 'A');
             after = toTranslate.Replace('Ć', 'C');
